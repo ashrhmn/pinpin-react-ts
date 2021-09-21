@@ -18,8 +18,8 @@ const WillGenerateDataWithLoop = ({
 
       <StyledDiv>Hello</StyledDiv>
       <VanillaStyledDiv>anillaa</VanillaStyledDiv>
-      {users.map((user) => (
-        <LoopComp user={user} />
+      {users.map((user,index) => (
+        <LoopComp key={index+user.id+user.name} user={user} />
       ))}
     </div>
   );

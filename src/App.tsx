@@ -1,29 +1,32 @@
 import React from "react";
-import Comp1 from "./component/Comp1";
-import Comp2 from "./component/Comp2";
-
-import { useRecoilState } from "recoil";
-import { countState, usersState } from "./store";
-import WillGenerateDataWithLoop from "./component/WillGenerateDataWithLoop";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import Dashboard from "./component/Dashboard";
+import Home from "./component/Home";
+import Login from "./component/Login";
+import Nav from "./component/Nav";
+import { baseUrlState } from "./store";
 
 const App = () => {
-  const [count, setCount] = useRecoilState(countState);
-  const [users, setUsers] = useRecoilState(usersState);
+  const baseUrl = useRecoilValue(baseUrlState);
   return (
-    <div className="bg-gray-300">
-      <h1>Hello</h1>
-      <p>{count}</p>
-      <button onClick={() => setCount(count + 1)}>Inc</button>
-      <button onClick={() => setCount(count - 1)}>Dec</button>
-      <Comp1 />
-      <Comp2 />
-      <h1>Multiple Data</h1>
-      <button onClick={() => setUsers([...users, { id: 19, name: "Ash" }])}>
-        Add
-      </button>
-      <button>Delete</button>
-      <WillGenerateDataWithLoop users={users} count={count} />
-    </div>
+    <>
+      <h1>{baseUrl}</h1>
+      <BrowserRouter>
+        <Nav />
+        <Switch>
+          <Route exact path={baseUrl}>
+            <Home />
+          </Route>
+          <Route path={baseUrl + "dashboard"}>
+            <Dashboard />
+          </Route>
+          <Route path={baseUrl + "login"}>
+            <Login />
+          </Route>
+        </Switch>
+      </BrowserRouter>
+    </>
   );
 };
 
