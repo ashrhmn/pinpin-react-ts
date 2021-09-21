@@ -17,6 +17,8 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
+  let timeOutId: number | undefined;
+
   const handleSIgnUp = async () => {
     if (password != confirmPassword) return;
     const response = await service.post(`/auth/signup/`, {
@@ -27,8 +29,9 @@ const SignUp = () => {
     });
     console.log(response.data);
     setMessage(response.data.msg);
-    setTimeout(() => {
+    timeOutId = setTimeout(() => {
       setMessage(null);
+      clearTimeout(timeOutId);
     }, 4000);
   };
 

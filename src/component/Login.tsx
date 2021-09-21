@@ -59,7 +59,7 @@ const Login = () => {
                 />
               </div>
               <div className="flex justify-center">
-                <LoginButton onClick={loginHandler}>Login</LoginButton>
+                <LoginButton onClick={loginHandler}>Sign In</LoginButton>
                 <SignUpButton>
                   <Link to={baseUrl + "signup"}>Sign Up</Link>
                 </SignUpButton>

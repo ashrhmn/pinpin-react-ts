@@ -1,6 +1,6 @@
 import { atom, selector } from "recoil";
 import service from "../service";
-import { IauthUser } from "../types";
+import { IauthUser, IpinData } from "../types";
 
 export const authUserState = selector<IauthUser | null>({
   key: "authUserState",
@@ -20,6 +20,25 @@ export const authUserState = selector<IauthUser | null>({
       }
     } else {
       return { isLoggedIn: false, user: null, msg: "Not logged in" };
+    }
+  },
+});
+
+export const pinDataState = selector<IpinData[]>({
+  key: "pinDataState",
+  get: async ({ get }) => {
+    const token = get(tokenState);
+    if (token) {
+      try {
+        const response = await service.get(`/pindata/`, {
+          headers: { authToken: token },
+        });
+        console.log(response.data);
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return [];
+      }
     }
   },
 });
