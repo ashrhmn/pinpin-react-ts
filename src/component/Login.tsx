@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
 import { authUserState, baseUrlState, tokenState } from "../store";
 import tw from "tailwind-styled-components";
 import service from "../service";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const baseUrl = useRecoilValue(baseUrlState);
@@ -22,44 +23,16 @@ const Login = () => {
       if (response.data.token) {
         localStorage.setItem("authToken", response.data.token);
         setToken(response.data.token);
-        // await updateAuthUser();
       } else {
         localStorage.removeItem("authToken");
         setToken(null);
-        // setAuthUser(null);
       }
     } catch (error) {
       console.log(error);
       localStorage.removeItem("authToken");
       setToken(null);
-      //   setAuthUser(null);
     }
   };
-
-  //   const updateAuthUser = async () => {
-  //     try {
-  //       const authUserResponse = await service.get(`auth/authUser`, {
-  //         headers: {
-  //           authToken: localStorage.getItem("authToken"),
-  //         },
-  //       });
-  //       console.log(authUserResponse.data);
-  //       if (authUserResponse.data.isLoggedIn) {
-  //         setAuthUser(authUserResponse.data.user);
-  //       } else {
-  //         setAuthUser(null);
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //       setAuthUser(null);
-  //     }
-  //   };
-
-  useEffect(() => {
-    // updateAuthUser();
-  }, []);
-
-  //   if (authUser) return <Redirect to={baseUrl + "dashboard"} />;
 
   switch (authUser.state) {
     case "hasValue" || "hasError":
@@ -87,7 +60,9 @@ const Login = () => {
               </div>
               <div className="flex justify-center">
                 <LoginButton onClick={loginHandler}>Login</LoginButton>
-                <SignUpButton>Sign Up</SignUpButton>
+                <SignUpButton>
+                  <Link to={baseUrl + "signup"}>Sign Up</Link>
+                </SignUpButton>
               </div>
             </div>
           </div>
@@ -103,7 +78,7 @@ const Login = () => {
 export default Login;
 
 const Input = tw.input`border-2 border-black w-60 m-2 p-2 rounded focus:outline-none`;
-const Button = tw.button`transition-all rounded px-2 py-1 m-1`;
+const Button = tw.button`transition-all rounded px-2 w-20 py-1 m-1`;
 const LoginButton = tw(Button)`bg-blue-600 text-white hover:bg-blue-700`;
 const SignUpButton = tw(
   Button

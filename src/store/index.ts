@@ -1,13 +1,6 @@
 import { atom, selector } from "recoil";
 import service from "../service";
-import { IauthUser, User } from "../types";
-
-export const countState = atom({
-  key: "countState",
-  default: 0,
-});
-
-
+import { IauthUser } from "../types";
 
 export const authUserState = selector<IauthUser | null>({
   key: "authUserState",
@@ -21,15 +14,8 @@ export const authUserState = selector<IauthUser | null>({
           },
         });
         console.log(authUserResponse.data);
-        // if (authUserResponse.data.isLoggedIn) {
-        //   return authUserResponse.data;
-        // } else {
-        //   return null;
-        // }
         return authUserResponse.data;
       } catch (error) {
-        // console.log(error);
-        // return null;
         throw error;
       }
     } else {
@@ -38,28 +24,9 @@ export const authUserState = selector<IauthUser | null>({
   },
 });
 
-// export const authUserState = selector({
-//   key: "authUserState",
-//   get: async ({ get }) => {
-//     try {
-//       const token = get(tokenState);
-//       const response = await service.get(`auth/authUser`, {
-//         headers: {
-//           authToken: token,
-//         },
-//       });
-//       console.log(response.data);
-//       return response.data;
-//     } catch (error) {
-//       console.log(error);
-//       return null;
-//     }
-//   },
-// });
-
 export const tokenState = atom<string | null>({
   key: "tokenState",
-  default: null,
+  default: localStorage.getItem("authToken"),
 });
 
 export const baseUrlState = atom<string>({
@@ -67,10 +34,7 @@ export const baseUrlState = atom<string>({
   default: "/pinpin-react-ts/",
 });
 
-export const usersState = atom<User[]>({
-  key: "usersState",
-  default: [
-    { id: 1, name: "Ashik" },
-    { id: 2, name: "Ash" },
-  ],
+export const messageState = atom<string | null>({
+  key: "messageState",
+  default: null,
 });
