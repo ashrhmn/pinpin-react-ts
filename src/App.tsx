@@ -13,7 +13,7 @@ const App = () => {
   const baseUrl = useRecoilValue(baseUrlState);
   const message = useRecoilValue(messageState);
   return (
-    <StyledDiv>
+    <StyledDiv className="bg-blue-300">
       <h1>{baseUrl}</h1>
       <h1>{message}</h1>
       <BrowserRouter>
@@ -40,6 +40,6 @@ const App = () => {
 export default App;
 
 const StyledDiv = styled.div`
-  max-width: 500px;
+  max-width: 400px;
   margin: 0 auto;
 `;

@@ -8,6 +8,7 @@ import {
   tokenState,
 } from "../store";
 import { IpinData } from "../types";
+import PinData from "./PinData";
 
 const Dashboard = () => {
   const baseUrl = useRecoilValue(baseUrlState);
@@ -21,6 +22,11 @@ const Dashboard = () => {
           <div>
             <h1>{authUser.contents?.user.username}</h1>
             {pinData.state == "hasValue" ? (
+              <PinData pinData={pinData.contents} />
+            ) : (
+              <>Loading PinData...</>
+            )}
+            {/* {pinData.state == "hasValue" ? (
               pinData.contents?.map((data: IpinData) => (
                 <li
                   key={
@@ -36,8 +42,8 @@ const Dashboard = () => {
                 </li>
               ))
             ) : (
-              <>Loading PinData...</>
-            )}
+              <>Loading PinData fake...</>
+            )} */}
             <button
               onClick={() => {
                 localStorage.removeItem("authToken");
