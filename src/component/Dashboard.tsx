@@ -26,24 +26,6 @@ const Dashboard = () => {
             ) : (
               <>Loading PinData...</>
             )}
-            {/* {pinData.state == "hasValue" ? (
-              pinData.contents?.map((data: IpinData) => (
-                <li
-                  key={
-                    data.id +
-                    data.name +
-                    data.description +
-                    data.secret +
-                    data.createdDate +
-                    data.updatedDate
-                  }
-                >
-                  {data.name + " " + data.description + " " + data.secret}
-                </li>
-              ))
-            ) : (
-              <>Loading PinData fake...</>
-            )} */}
             <button
               onClick={() => {
                 localStorage.removeItem("authToken");
