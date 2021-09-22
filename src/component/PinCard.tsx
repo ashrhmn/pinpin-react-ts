@@ -1,25 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { IpinData } from "../types";
+import EditPinData from "./EditPinData";
 
 const PinCard = ({ data }: { data: IpinData }) => {
+  const [editing, setEditing] = useState(false);
   return (
-    <div className="flex items-center justify-between text-2xl mt-4 mb-4">
-      <div className="flex flex-col w-2/3">
-        <h1>{data.name}</h1>
-        <p>{data.description}</p>
-      </div>
-      <div className="flex flex-col w-1/3">
-        <p className="break-words text-center">{data.secret}</p>
-        <div className="flex justify-evenly">
-          <button>
-            <EditButton />
-          </button>
-          <button>
-            <DeleteButton />
-          </button>
+    <>
+      {!editing ? (
+        <div className="flex items-center justify-between text-2xl mt-4 mb-4 p-2 bg-blue-600 text-white rounded-lg">
+          <div className="flex flex-col w-2/3">
+            <h1>{data.name}</h1>
+            <p>{data.description}</p>
+          </div>
+          <div className="flex flex-col w-1/3">
+            <p className="break-words text-center">{data.secret}</p>
+            <div className="flex justify-evenly">
+              <button onClick={() => setEditing(true)}>
+                <EditButton />
+              </button>
+              <button>
+                <DeleteButton />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <EditPinData data={data} setEditing={setEditing} />
+      )}
+    </>
   );
 };
 
