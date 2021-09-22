@@ -1,9 +1,27 @@
 import React, { useState } from "react";
+import { useRecoilState } from "recoil";
+import service from "../service";
+import { refreshPinDataCountState } from "../store";
 import { IpinData } from "../types";
 import EditPinData from "./EditPinData";
 
 const PinCard = ({ data }: { data: IpinData }) => {
   const [editing, setEditing] = useState(false);
+
+  const [refreshCount, setRefreshCount] = useRecoilState(
+    refreshPinDataCountState
+  );
+
+  const handleDelete = async () => {
+    try {
+      const { id } = data;
+      const response = await service.delete(`/pindata/id/${id}`);
+      console.log(response.data);
+      setRefreshCount(refreshCount + 1);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       {!editing ? (
@@ -18,7 +36,7 @@ const PinCard = ({ data }: { data: IpinData }) => {
               <button onClick={() => setEditing(true)}>
                 <EditButton />
               </button>
-              <button>
+              <button onClick={handleDelete}>
                 <DeleteButton />
               </button>
             </div>
