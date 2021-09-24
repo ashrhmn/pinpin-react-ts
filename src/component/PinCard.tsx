@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import service from "../service";
 import { refreshPinDataCountState } from "../store";
@@ -7,21 +8,46 @@ import EditPinData from "./EditPinData";
 
 const PinCard = ({ data }: { data: IpinData }) => {
   const [editing, setEditing] = useState(false);
+  const queryClient = useQueryClient();
 
   const [refreshCount, setRefreshCount] = useRecoilState(
     refreshPinDataCountState
   );
 
-  const handleDelete = async () => {
+  const deleteData = async ({ id }: { id: number }) => {
     try {
-      const { id } = data;
       const response = await service.delete(`/pindata/id/${id}`);
       console.log(response.data);
-      setRefreshCount(refreshCount + 1);
+      return response.data;
     } catch (error) {
       console.log(error);
+      return error;
     }
   };
+
+  const deleteDataMutation = useMutation(deleteData, {
+    onMutate: async ({ id }: { id: number }) => {
+      await queryClient.cancelQueries("pindata");
+      const preData = queryClient.getQueryData<IpinData[]>("pindata");
+      if (preData) {
+        queryClient.setQueryData(
+          "pindata",
+          preData?.filter((data) => data.id != id)
+        );
+        return { preData };
+      } else {
+        return null;
+      }
+    },
+    onError: (error, variable, context) => {
+      console.log(error);
+      queryClient.setQueryData("pindata", context?.preData);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries("pindata");
+    },
+  });
+
   return (
     <>
       {!editing ? (
@@ -36,7 +62,7 @@ const PinCard = ({ data }: { data: IpinData }) => {
               <button onClick={() => setEditing(true)}>
                 <EditButton />
               </button>
-              <button onClick={handleDelete}>
+              <button onClick={() => deleteDataMutation.mutate(data)}>
                 <DeleteButton />
               </button>
             </div>

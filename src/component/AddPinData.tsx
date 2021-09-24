@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import tw from "tailwind-styled-components";
 import service from "../service";
-import { refreshPinDataCountState } from "../store";
+import { isAddingNewData } from "../store";
 import { IpinData } from "../types";
 
 const AddPinData = () => {
+  const queryClient = useQueryClient();
+  const [adding, setAdding] = useRecoilState(isAddingNewData);
   const [localPinData, setLocalPinData] = useState<IpinData>({
     id: 0,
     username: "",
@@ -16,22 +19,50 @@ const AddPinData = () => {
     updatedDate: "",
   });
 
-  const [refreshCount, setRefreshCount] = useRecoilState(
-    refreshPinDataCountState
-  );
-
-  const handleSaveNewData = async () => {
+  const saveNewData = async ({ name, description, secret }: INewData) => {
     try {
-      const { name, description, secret } = localPinData;
       const response = await service.post(`/pindata/`, {
         name,
-        description,
-        secret,
+        description: description == "" ? null : description,
+        secret: secret == "" ? null : secret,
       });
       console.log(response.data);
-      setRefreshCount(refreshCount + 1);
-    } catch (error) {}
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   };
+
+  const addNewDataMutation = useMutation(saveNewData, {
+    onMutate: async ({ name, description, secret }: INewData) => {
+      console.log({ name, description, secret });
+      await queryClient.cancelQueries("pindata");
+      const preData = queryClient.getQueryData<IpinData[]>("pindata");
+      console.log(preData);
+
+      if (preData) {
+        queryClient.setQueryData("pindata", [
+          ...preData,
+          { name, description, secret },
+        ]);
+        return { preData };
+      } else {
+        queryClient.setQueryData("pindata", []);
+        return null;
+      }
+    },
+    onError: (error, variable, context) => {
+      console.log(error);
+      queryClient.setQueryData("pindata", context?.preData);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries("pindata");
+    },
+    onSuccess: () => {
+      setAdding(false);
+    },
+  });
 
   return (
     <Container>
@@ -63,11 +94,11 @@ const AddPinData = () => {
         />
       </InputContainer>
       <ButtonContainer>
-        <Button onClick={handleSaveNewData}>
+        <Button onClick={() => addNewDataMutation.mutate(localPinData)}>
           <SaveIcon />
           <p>Save</p>
         </Button>
-        <Button>
+        <Button onClick={() => setAdding(false)}>
           <CancelIcon />
           <p>Cancel</p>
         </Button>
@@ -117,3 +148,9 @@ const CancelIcon = () => (
     />
   </svg>
 );
+
+interface INewData {
+  name: string;
+  description: string;
+  secret: string;
+}

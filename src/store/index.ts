@@ -49,6 +49,11 @@ export const pinDataState = selector<IpinData[]>({
   },
 });
 
+export const isAddingNewData = atom<boolean>({
+  key: "isAddingNewData",
+  default: false,
+});
+
 export const tokenState = atom<string | null>({
   key: "tokenState",
   default: localStorage.getItem("authToken"),
