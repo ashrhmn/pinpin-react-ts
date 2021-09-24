@@ -17,12 +17,6 @@ const EditPinData = ({
 
   const saveEdits = async ({ id, name, description, secret }: IeditPinData) => {
     try {
-    //   const response = await service.post(`/pindata/`, {
-    //     id,
-    //     name,
-    //     description: description == "" ? null : description,
-    //     secret: secret == "" ? null : secret,
-    //   });
         const response = await service.put(`/pindata/id/${id}`, {
           name,
           description: description == "" ? null : description,

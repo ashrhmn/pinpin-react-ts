@@ -24,30 +24,6 @@ export const authUserState = selector<IauthUser | null>({
   },
 });
 
-export const refreshPinDataCountState = atom({
-  key: "refreshPinDataCountState",
-  default: 1,
-});
-
-export const pinDataState = selector<IpinData[]>({
-  key: "pinDataState",
-  get: async ({ get }) => {
-    const token = get(tokenState);
-    const refreshCount = get(refreshPinDataCountState);
-    if (token && refreshCount) {
-      try {
-        const response = await service.get(`/pindata/`, {
-          headers: { authToken: token },
-        });
-        console.log(response.data);
-        return response.data;
-      } catch (error) {
-        console.log(error);
-        return [];
-      }
-    }
-  },
-});
 
 export const isAddingNewData = atom<boolean>({
   key: "isAddingNewData",

@@ -2,17 +2,12 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import service from "../service";
-import { refreshPinDataCountState } from "../store";
 import { IpinData } from "../types";
 import EditPinData from "./EditPinData";
 
 const PinCard = ({ data }: { data: IpinData }) => {
   const [editing, setEditing] = useState(false);
   const queryClient = useQueryClient();
-
-  const [refreshCount, setRefreshCount] = useRecoilState(
-    refreshPinDataCountState
-  );
 
   const deleteData = async ({ id }: { id: number }) => {
     try {

@@ -5,7 +5,7 @@ import { IpinData } from "../types";
 import AddPinData from "./AddPinData";
 import PinCard from "./PinCard";
 
-const PinData = ({ pinData }: { pinData: IpinData[] }) => {
+const PinData = () => {
   const pinDataQuery = useQuery("pindata", () =>
     service
       .get("/pindata/", {
