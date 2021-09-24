@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { useQuery } from "react-query";
+import React from "react";
 import { Redirect } from "react-router";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
 import {
   authUserState,
   baseUrlState,
   isAddingNewData,
+  messageState,
+  showMessage,
   tokenState,
 } from "../store";
 import AddPinData from "./AddPinData";
@@ -14,31 +15,15 @@ import PinData from "./PinData";
 const Dashboard = () => {
   const baseUrl = useRecoilValue(baseUrlState);
   const authUser = useRecoilValueLoadable(authUserState);
-  const [token, setToken] = useRecoilState(tokenState);
-  const [adding, setAdding] = useRecoilState(isAddingNewData);
   switch (authUser.state) {
     case "hasValue":
       if (authUser.contents?.isLoggedIn) {
         return (
           <div>
             <h1>{authUser.contents?.user.username}</h1>
-            <button
-              onClick={() => setAdding(!adding)}
-              className="flex items-center bg-green-600 text-white rounded p-2"
-            >
-              <AddIcon />
-              <p>Add New</p>
-            </button>
-            {adding ? <AddPinData /> : <></>}
+            <AddNewData />
             <PinData />
-            <button
-              onClick={() => {
-                localStorage.removeItem("authToken");
-                setToken(null);
-              }}
-            >
-              Logout
-            </button>
+            <LogOutButton />
           </div>
         );
       } else {
@@ -52,6 +37,38 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+const LogOutButton = () => {
+  const [, setToken] = useRecoilState(tokenState);
+  const [, setMessage] = useRecoilState(messageState);
+  return (
+    <button
+      onClick={() => {
+        localStorage.removeItem("authToken");
+        setToken(null);
+        showMessage("Logged out", setMessage);
+      }}
+    >
+      Logout
+    </button>
+  );
+};
+
+const AddNewData = () => {
+  const [adding, setAdding] = useRecoilState(isAddingNewData);
+  return (
+    <>
+      <button
+        onClick={() => setAdding(!adding)}
+        className="flex items-center bg-green-600 text-white rounded p-2"
+      >
+        <AddIcon />
+        <p>Add New</p>
+      </button>
+      {adding ? <AddPinData /> : <></>}
+    </>
+  );
+};
 
 const AddIcon = () => (
   <svg

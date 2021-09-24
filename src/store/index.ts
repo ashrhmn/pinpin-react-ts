@@ -1,4 +1,4 @@
-import { atom, selector } from "recoil";
+import { atom, selector, useRecoilState } from "recoil";
 import service from "../service";
 import { IauthUser, IpinData } from "../types";
 
@@ -24,7 +24,6 @@ export const authUserState = selector<IauthUser | null>({
   },
 });
 
-
 export const isAddingNewData = atom<boolean>({
   key: "isAddingNewData",
   default: false,
@@ -44,3 +43,23 @@ export const messageState = atom<string | null>({
   key: "messageState",
   default: null,
 });
+
+export const messageTimeoutIdState = atom({
+  key: "messageTimeoutIdState",
+  default: 0,
+});
+
+export const showMessage = (
+  msg: string,
+  setMessage: Function,
+  timeout = 2000
+) => {
+  setMessage(msg);
+  console.log("Showing Message : ", msg);
+  const timeOutId = setTimeout(() => {
+    setMessage(null);
+    console.log("Closing Message : ", msg);
+    console.log("tout id : ", timeOutId);
+    clearTimeout(timeOutId);
+  }, timeout);
+};

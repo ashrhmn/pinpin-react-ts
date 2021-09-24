@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import service from "../service";
+import { messageState, showMessage } from "../store";
 import { IpinData } from "../types";
 import EditPinData from "./EditPinData";
 
@@ -9,9 +10,15 @@ const PinCard = ({ data }: { data: IpinData }) => {
   const [editing, setEditing] = useState(false);
   const queryClient = useQueryClient();
 
+  const [, setMessage] = useRecoilState(messageState);
+
   const deleteData = async ({ id }: { id: number }) => {
     try {
-      const response = await service.delete(`/pindata/id/${id}`);
+      const response = await service.delete(`/pindata/id/${id}`, {
+        headers: {
+          authToken: localStorage.getItem("authToken"),
+        },
+      });
       console.log(response.data);
       return response.data;
     } catch (error) {
@@ -22,6 +29,7 @@ const PinCard = ({ data }: { data: IpinData }) => {
 
   const deleteDataMutation = useMutation(deleteData, {
     onMutate: async ({ id }: { id: number }) => {
+      setMessage("Deleting...");
       await queryClient.cancelQueries("pindata");
       const preData = queryClient.getQueryData<IpinData[]>("pindata");
       if (preData) {
@@ -35,11 +43,15 @@ const PinCard = ({ data }: { data: IpinData }) => {
       }
     },
     onError: (error, variable, context) => {
+      showMessage("Error deleting data, reverting....", setMessage);
       console.log(error);
       queryClient.setQueryData("pindata", context?.preData);
     },
     onSettled: () => {
       queryClient.invalidateQueries("pindata");
+    },
+    onSuccess: () => {
+      showMessage("Deleted succesfully", setMessage);
     },
   });
 

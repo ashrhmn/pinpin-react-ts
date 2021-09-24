@@ -22,7 +22,6 @@ const PinData = () => {
     case "success":
       return (
         <>
-          <h1>Success</h1>
           {pinDataQuery.data.map((data: IpinData) => (
             <PinCard
               key={

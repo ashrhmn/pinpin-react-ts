@@ -20,7 +20,30 @@ const SignUp = () => {
   let timeOutId: number | undefined;
 
   const handleSIgnUp = async () => {
-    if (password != confirmPassword) return;
+    if (username == "") {
+      setMessage("Username can not be empty");
+      timeOutId = setTimeout(() => {
+        setMessage(null);
+        clearTimeout(timeOutId);
+      }, 2000);
+      return;
+    }
+    if (password != confirmPassword) {
+      setMessage("Passwords don't match");
+      timeOutId = setTimeout(() => {
+        setMessage(null);
+        clearTimeout(timeOutId);
+      }, 2000);
+      return;
+    }
+    if (password == "") {
+      setMessage("Password can not be empty");
+      timeOutId = setTimeout(() => {
+        setMessage(null);
+        clearTimeout(timeOutId);
+      }, 2000);
+      return;
+    }
     const response = await service.post(`/auth/signup/`, {
       username,
       password,
@@ -32,7 +55,7 @@ const SignUp = () => {
     timeOutId = setTimeout(() => {
       setMessage(null);
       clearTimeout(timeOutId);
-    }, 4000);
+    }, 2000);
   };
 
   switch (authUser.state) {

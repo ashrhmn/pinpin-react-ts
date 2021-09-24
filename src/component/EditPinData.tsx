@@ -3,6 +3,8 @@ import { IpinData } from "../types";
 import tw from "tailwind-styled-components";
 import service from "../service";
 import { useMutation, useQueryClient } from "react-query";
+import { useRecoilState } from "recoil";
+import { messageState, showMessage } from "../store";
 
 const EditPinData = ({
   data,
@@ -15,13 +17,23 @@ const EditPinData = ({
 
   const [localPinData, setLocalPinData] = useState<IpinData>(data);
 
+  const [, setMessage] = useRecoilState(messageState);
+
   const saveEdits = async ({ id, name, description, secret }: IeditPinData) => {
     try {
-        const response = await service.put(`/pindata/id/${id}`, {
+      const response = await service.put(
+        `/pindata/id/${id}`,
+        {
           name,
           description: description == "" ? null : description,
           secret: secret == "" ? null : secret,
-        });
+        },
+        {
+          headers: {
+            authToken: localStorage.getItem("authToken"),
+          },
+        }
+      );
       console.log(response.data);
       return response.data;
     } catch (error) {
@@ -31,6 +43,8 @@ const EditPinData = ({
 
   const saveEditsMutation = useMutation(saveEdits, {
     onMutate: async (variable: IeditPinData) => {
+      setEditing(false);
+      setMessage("Saving Edits");
       await queryClient.cancelQueries("pindata");
       const predata = queryClient.getQueryData<IpinData[]>("pindata");
       if (predata) {
@@ -55,6 +69,7 @@ const EditPinData = ({
       }
     },
     onError: (error, variable, context) => {
+      showMessage("Error saving edits, reverting.....", setMessage);
       console.log(error);
       queryClient.setQueryData("pindata", context?.predata);
     },
@@ -62,7 +77,7 @@ const EditPinData = ({
       queryClient.invalidateQueries("pindata");
     },
     onSuccess: () => {
-      setEditing(false);
+      showMessage("Edit saved successfully", setMessage);
     },
   });
 
@@ -112,11 +127,11 @@ const EditPinData = ({
 export default EditPinData;
 
 const ButtonContainer = tw.div`flex w-full justify-evenly mt-2`;
-const Container = tw.div`flex flex-col items-center p-2 bg-green-600 rounded-lg text-lg`;
+const Container = tw.div`flex flex-col items-center p-2 bg-green-600 rounded-lg text-lg mt-2 mb-2`;
 const Button = tw.button`text-green-100 bg-blue-700 rounded w-32 pl-5 pr-5 pt-2 pb-2 flex items-center space-x-2 justify-center`;
 const InputLabel = tw.h1`text-white`;
 const InputContainer = tw.div`flex items-center justify-between space-x-2 w-full`;
-const Input = tw.input`border-2 border-green-700 rounded focus:outline-none p-1 mt-1 mb-1`;
+const Input = tw.input`border-2 border-green-700 rounded focus:outline-none p-1 mt-1 mb-1 w-60`;
 const SaveIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

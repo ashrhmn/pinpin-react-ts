@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
-import { authUserState, baseUrlState, tokenState } from "../store";
+import {
+  authUserState,
+  baseUrlState,
+  messageState,
+  messageTimeoutIdState,
+  showMessage,
+  tokenState,
+} from "../store";
 import tw from "tailwind-styled-components";
 import service from "../service";
 import { Link } from "react-router-dom";
@@ -12,7 +19,9 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const authUser = useRecoilValueLoadable(authUserState);
-  const [token, setToken] = useRecoilState(tokenState);
+  const [, setToken] = useRecoilState(tokenState);
+  const [, setMessage] = useRecoilState(messageState);
+  const [timeOutId, setTimeoutId] = useRecoilState(messageTimeoutIdState);
   const loginHandler = async () => {
     try {
       const response = await service.post(`auth/login/`, {
@@ -23,6 +32,16 @@ const Login = () => {
       if (response.data.token) {
         localStorage.setItem("authToken", response.data.token);
         setToken(response.data.token);
+        showMessage(response.data.msg, setMessage);
+
+        // clearTimeout(timeOutId);
+        // setMessage(response.data.msg);
+        // setTimeoutId(
+        //   setTimeout(() => {
+        //     setMessage(null);
+        //     clearTimeout(timeOutId);
+        //   }, 2)
+        // );
       } else {
         localStorage.removeItem("authToken");
         setToken(null);
@@ -41,8 +60,6 @@ const Login = () => {
       } else {
         return (
           <div>
-            <h1>Login</h1>
-            <button onClick={() => history.push(baseUrl)}>Go home</button>
             <div className="flex flex-col">
               <div className="flex flex-col items-center">
                 <Input
