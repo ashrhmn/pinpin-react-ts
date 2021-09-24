@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { IpinData } from "../types";
 import tw from "tailwind-styled-components";
 import service from "../service";
-import { useRecoilState } from "recoil";
-import { refreshPinDataCountState } from "../store";
+import { useMutation, useQueryClient } from "react-query";
 
 const EditPinData = ({
   data,
@@ -12,27 +11,66 @@ const EditPinData = ({
   data: IpinData;
   setEditing: Function;
 }) => {
+  const queryClient = useQueryClient();
+
   const [localPinData, setLocalPinData] = useState<IpinData>(data);
 
-  const [refreshCount, setRefreshCount] = useRecoilState(
-    refreshPinDataCountState
-  );
-
-  const handleSaveEdits = async () => {
+  const saveEdits = async ({ id, name, description, secret }: IeditPinData) => {
     try {
-      const { id, name, description, secret } = localPinData;
-      const response = await service.put(`/pindata/id/${id}`, {
-        name,
-        description,
-        secret,
-      });
+    //   const response = await service.post(`/pindata/`, {
+    //     id,
+    //     name,
+    //     description: description == "" ? null : description,
+    //     secret: secret == "" ? null : secret,
+    //   });
+        const response = await service.put(`/pindata/id/${id}`, {
+          name,
+          description: description == "" ? null : description,
+          secret: secret == "" ? null : secret,
+        });
       console.log(response.data);
-      setRefreshCount(refreshCount + 1);
+      return response.data;
     } catch (error) {
       console.log(error);
     }
   };
 
+  const saveEditsMutation = useMutation(saveEdits, {
+    onMutate: async (variable: IeditPinData) => {
+      await queryClient.cancelQueries("pindata");
+      const predata = queryClient.getQueryData<IpinData[]>("pindata");
+      if (predata) {
+        queryClient.setQueryData(
+          "pindata",
+          predata?.filter((data) => {
+            if (data.id != variable.id) {
+              return data;
+            } else {
+              return {
+                ...data,
+                name: variable.name,
+                description: variable.description,
+                secret: variable.secret,
+              };
+            }
+          })
+        );
+        return { predata };
+      } else {
+        return null;
+      }
+    },
+    onError: (error, variable, context) => {
+      console.log(error);
+      queryClient.setQueryData("pindata", context?.predata);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries("pindata");
+    },
+    onSuccess: () => {
+      setEditing(false);
+    },
+  });
 
   return (
     <Container>
@@ -48,7 +86,7 @@ const EditPinData = ({
       <InputContainer>
         <InputLabel>Description :</InputLabel>
         <Input
-          value={localPinData.description}
+          value={localPinData.description ? localPinData.description : ""}
           onChange={(e) =>
             setLocalPinData({ ...localPinData, description: e.target.value })
           }
@@ -64,7 +102,7 @@ const EditPinData = ({
         />
       </InputContainer>
       <ButtonContainer>
-        <Button onClick={handleSaveEdits}>
+        <Button onClick={() => saveEditsMutation.mutate(localPinData)}>
           <SaveIcon />
           <p>Save</p>
         </Button>
@@ -118,3 +156,10 @@ const CancelIcon = () => (
     />
   </svg>
 );
+
+interface IeditPinData {
+  id: number;
+  name: string;
+  description: string | null;
+  secret: string;
+}

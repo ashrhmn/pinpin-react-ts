@@ -78,7 +78,7 @@ const AddPinData = () => {
       <InputContainer>
         <InputLabel>Description :</InputLabel>
         <Input
-          value={localPinData.description}
+          value={localPinData.description ? localPinData.description : ""}
           onChange={(e) =>
             setLocalPinData({ ...localPinData, description: e.target.value })
           }
@@ -151,6 +151,6 @@ const CancelIcon = () => (
 
 interface INewData {
   name: string;
-  description: string;
+  description: string | null;
   secret: string;
 }

@@ -13,7 +13,7 @@ export interface IpinData {
   id: number;
   name: string;
   username: string;
-  description: string;
+  description: string | null;
   secret: string;
   createdDate: string;
   updatedDate: string;
