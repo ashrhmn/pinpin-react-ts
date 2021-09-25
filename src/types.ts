@@ -15,6 +15,8 @@ export interface IpinData {
   username: string;
   description: string | null;
   secret: string;
+  isFavourite: boolean;
+  isTrashed: boolean;
   createdDate: string;
   updatedDate: string;
 }

@@ -23,7 +23,7 @@ const Dashboard = () => {
             <h1>{authUser.contents?.user.username}</h1>
             <AddNewData />
             <PinData />
-            <LogOutButton />
+            {/* <LogOutButton /> */}
           </div>
         );
       } else {
@@ -38,21 +38,21 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-const LogOutButton = () => {
-  const [, setToken] = useRecoilState(tokenState);
-  const [, setMessage] = useRecoilState(messageState);
-  return (
-    <button
-      onClick={() => {
-        localStorage.removeItem("authToken");
-        setToken(null);
-        showMessage("Logged out", setMessage);
-      }}
-    >
-      Logout
-    </button>
-  );
-};
+// const LogOutButton = () => {
+//   const [, setToken] = useRecoilState(tokenState);
+//   const [, setMessage] = useRecoilState(messageState);
+//   return (
+//     <button
+//       onClick={() => {
+//         localStorage.removeItem("authToken");
+//         setToken(null);
+//         showMessage("Logged out", setMessage);
+//       }}
+//     >
+//       Logout
+//     </button>
+//   );
+// };
 
 const AddNewData = () => {
   const [adding, setAdding] = useRecoilState(isAddingNewData);

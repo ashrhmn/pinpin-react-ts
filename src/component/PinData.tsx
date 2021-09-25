@@ -28,7 +28,7 @@ const PinData = () => {
                 data.id +
                 data.name +
                 data.description +
-                data.secret +
+                data.secret + data.isFavourite + data.isTrashed +
                 data.createdDate +
                 data.updatedDate
               }

@@ -29,10 +29,10 @@ const Login = () => {
         password,
       });
       console.log(response.data);
+      showMessage(response.data.msg, setMessage);
       if (response.data.token) {
         localStorage.setItem("authToken", response.data.token);
         setToken(response.data.token);
-        showMessage(response.data.msg, setMessage);
 
         // clearTimeout(timeOutId);
         // setMessage(response.data.msg);

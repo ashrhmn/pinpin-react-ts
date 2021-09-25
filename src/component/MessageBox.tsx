@@ -13,7 +13,7 @@ const MessageBox = () => {
   return (
     <div>
       {message ? (
-        <div className="flex items-center space-x-3 bg-blue-700 rounded text-white justify-center shadow-lg px-2 py-1 m-2 absolute bottom-2 right-2">
+        <div className="flex items-center space-x-3 bg-blue-700 rounded text-white justify-center shadow-2xl px-2 py-1 m-2 absolute bottom-2 right-2">
           <h1>{message}</h1>
           <button
             className="bg-red-700 text-white rounded-full"

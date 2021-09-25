@@ -57,6 +57,7 @@ const Nav = () => {
     case "loading":
       return <>Loading...</>;
     case "hasError":
+      localStorage.removeItem('authToken')
       return (
         <>
           <h1 className="text-red-600">
