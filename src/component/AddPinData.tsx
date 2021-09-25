@@ -16,6 +16,8 @@ const AddPinData = () => {
     name: "",
     description: "",
     secret: "",
+    isFavourite:false,
+    isTrashed:false,
     createdDate: "",
     updatedDate: "",
   });
