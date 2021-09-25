@@ -5,6 +5,7 @@ import service from "../service";
 import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import { messageState, showMessage } from "../store";
+import { sortByFav, sortByName } from "../utils";
 
 const EditPinData = ({
   data,
@@ -47,28 +48,46 @@ const EditPinData = ({
       setMessage("Saving Edits");
       await queryClient.cancelQueries("pindata");
       const predata = queryClient.getQueryData<IpinData[]>("pindata");
+      const newData = predata?.map((data) => {
+        if (data.id != variable.id) {
+          return data;
+        } else {
+          return {
+            ...data,
+            name: variable.name,
+            description: variable.description,
+            secret: variable.secret,
+          };
+        }
+      });
+
+      console.log(newData?.sort(sortByName).sort(sortByFav));
+
       if (predata) {
         queryClient.setQueryData(
           "pindata",
-          predata?.filter((data) => {
-            if (data.id != variable.id) {
-              return data;
-            } else {
-              return {
-                ...data,
-                name: variable.name,
-                description: variable.description,
-                secret: variable.secret,
-              };
-            }
-          })
+          predata
+            ?.map((data) => {
+              if (data.id != variable.id) {
+                return data;
+              } else {
+                return {
+                  ...data,
+                  name: variable.name,
+                  description: variable.description,
+                  secret: variable.secret,
+                };
+              }
+            })
+            .sort(sortByName)
+            .sort(sortByFav)
         );
         return { predata };
       } else {
         return null;
       }
     },
-    onError: (error, variable, context) => {
+    onError: (error, _variable, context) => {
       showMessage("Error saving edits, reverting.....", setMessage);
       console.log(error);
       queryClient.setQueryData("pindata", context?.predata);

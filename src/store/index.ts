@@ -55,11 +55,11 @@ export const showMessage = (
   timeout = 2000
 ) => {
   setMessage(msg);
-  console.log("Showing Message : ", msg);
+  // console.log("Showing Message : ", msg);
   const timeOutId = setTimeout(() => {
     setMessage(null);
-    console.log("Closing Message : ", msg);
-    console.log("tout id : ", timeOutId);
+    // console.log("Closing Message : ", msg);
+    // console.log("tout id : ", timeOutId);
     clearTimeout(timeOutId);
   }, timeout);
 };

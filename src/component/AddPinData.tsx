@@ -5,6 +5,7 @@ import tw from "tailwind-styled-components";
 import service from "../service";
 import { isAddingNewData, messageState, showMessage } from "../store";
 import { IpinData } from "../types";
+import { sortByFav, sortByName } from "../utils";
 
 const AddPinData = () => {
   const queryClient = useQueryClient();
@@ -16,8 +17,8 @@ const AddPinData = () => {
     name: "",
     description: "",
     secret: "",
-    isFavourite:false,
-    isTrashed:false,
+    isFavourite: false,
+    isTrashed: false,
     createdDate: "",
     updatedDate: "",
   });
@@ -55,10 +56,12 @@ const AddPinData = () => {
       console.log(preData);
 
       if (preData) {
-        queryClient.setQueryData("pindata", [
-          ...preData,
-          { name, description, secret },
-        ]);
+        queryClient.setQueryData(
+          "pindata",
+          [...preData, { name, description, secret }]
+            .sort(sortByName)
+            .sort(sortByFav)
+        );
         return { preData };
       } else {
         queryClient.setQueryData("pindata", []);
