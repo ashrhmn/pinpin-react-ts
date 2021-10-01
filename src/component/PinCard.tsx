@@ -15,7 +15,28 @@ const PinCard = ({ data }: { data: IpinData }) => {
 
   const deleteData = async ({ id }: { id: number }) => {
     try {
-      const response = await service.delete(`/pindata/id/${id}`, {
+      const response = data.isTrashed
+        ? await service.delete(`/pindata/id/${id}`, {
+            headers: {
+              authToken: localStorage.getItem("authToken"),
+            },
+          })
+        : await service.put(`/pindata/toogleTrashed/${id}`, {
+            headers: {
+              authToken: localStorage.getItem("authToken"),
+            },
+          });
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  };
+
+  const toogleTrashed = async ({ id }: { id: number }) => {
+    try {
+      const response = await service.put(`/pindata/toogleTrashed/${id}`, {
         headers: {
           authToken: localStorage.getItem("authToken"),
         },
@@ -62,7 +83,6 @@ const PinCard = ({ data }: { data: IpinData }) => {
             .sort(sortByName)
             .sort(sortByFav)
         );
-        // data.isFavourite = !data.isFavourite
         return { preData };
       } else {
         return null;
@@ -81,14 +101,55 @@ const PinCard = ({ data }: { data: IpinData }) => {
     },
   });
 
+  const queryKey = data.isTrashed ? "pindatabin" : "pindata";
+
+  const mutationOnMutate = async ({ id }: { id: number }) => {
+    setMessage(data.isTrashed ? "Deleting..." : "Moving to bin...");
+    await queryClient.cancelQueries(queryKey);
+    const preData = queryClient.getQueryData<IpinData[]>(queryKey);
+    if (preData) {
+      queryClient.setQueryData(
+        queryKey,
+        preData.filter((data) => data.id != id)
+      );
+      return { preData };
+    } else {
+      return null;
+    }
+  };
+
   const deleteDataMutation = useMutation(deleteData, {
+    onMutate: mutationOnMutate,
+    onError: (error, _variable, context) => {
+      showMessage(
+        `Error ${
+          data.isTrashed ? "deleting data" : "moving data to bin"
+        }, reverting....`,
+        setMessage
+      );
+      console.log(error);
+      queryClient.setQueryData(queryKey, context?.preData);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries("pindatabin");
+      queryClient.invalidateQueries("pindata");
+    },
+    onSuccess: () => {
+      showMessage(
+        (data.isTrashed ? "Deleted" : "Moved to bin") + " succesfully",
+        setMessage
+      );
+    },
+  });
+
+  const toogleTrashedMutation = useMutation(toogleTrashed, {
     onMutate: async ({ id }: { id: number }) => {
-      setMessage("Deleting...");
-      await queryClient.cancelQueries("pindata");
-      const preData = queryClient.getQueryData<IpinData[]>("pindata");
+      setMessage("Restoring...");
+      await queryClient.cancelQueries(queryKey);
+      const preData = queryClient.getQueryData<IpinData[]>(queryKey);
       if (preData) {
         queryClient.setQueryData(
-          "pindata",
+          queryKey,
           preData.filter((data) => data.id != id)
         );
         return { preData };
@@ -97,22 +158,27 @@ const PinCard = ({ data }: { data: IpinData }) => {
       }
     },
     onError: (error, _variable, context) => {
-      showMessage("Error deleting data, reverting....", setMessage);
+      showMessage("Error restoring data, reverting....", setMessage);
       console.log(error);
-      queryClient.setQueryData("pindata", context?.preData);
+      queryClient.setQueryData(queryKey, context?.preData);
     },
     onSettled: () => {
+      queryClient.invalidateQueries("pindatabin");
       queryClient.invalidateQueries("pindata");
     },
     onSuccess: () => {
-      showMessage("Deleted succesfully", setMessage);
+      showMessage("Restored succesfully", setMessage);
     },
   });
 
   return (
     <>
       {!editing ? (
-        <div className="flex items-center justify-between text-2xl mt-4 mb-4 p-2 bg-blue-600 text-white rounded-lg shadow-lg">
+        <div
+          className={`flex items-center justify-between text-2xl mt-4 mb-4 p-2 ${
+            data.isTrashed ? "bg-red-600" : "bg-blue-600"
+          } text-white rounded-lg shadow-lg`}
+        >
           <div className="flex flex-col w-2/3">
             <h1>{data.name}</h1>
             <p>{data.description}</p>
@@ -120,14 +186,24 @@ const PinCard = ({ data }: { data: IpinData }) => {
           <div className="flex flex-col w-1/3">
             <p className="break-words text-center">{data.secret}</p>
             <div className="flex justify-evenly">
-              <button onClick={() => toogleFavouriteMutation.mutate(data)}>
-                {data.isFavourite ? <FavIconFilled /> : <FavIcon />}
-              </button>
-              <button onClick={() => setEditing(true)}>
-                <EditButton />
-              </button>
+              {data.isTrashed ? (
+                <>
+                  <button onClick={() => toogleTrashedMutation.mutate(data)}>
+                    <SaveIcon />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => toogleFavouriteMutation.mutate(data)}>
+                    {data.isFavourite ? <FavIconFilled /> : <FavIcon />}
+                  </button>
+                  <button onClick={() => setEditing(true)}>
+                    <EditIcon />
+                  </button>
+                </>
+              )}
               <button onClick={() => deleteDataMutation.mutate(data)}>
-                <DeleteButton />
+                <DeleteIcon />
               </button>
             </div>
           </div>
@@ -141,7 +217,24 @@ const PinCard = ({ data }: { data: IpinData }) => {
 
 export default PinCard;
 
-const DeleteButton = () => (
+const SaveIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+    />
+  </svg>
+);
+
+const DeleteIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="h-6 w-6"
@@ -158,7 +251,7 @@ const DeleteButton = () => (
   </svg>
 );
 
-const EditButton = () => (
+const EditIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="h-6 w-6"

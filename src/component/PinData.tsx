@@ -5,10 +5,10 @@ import { IpinData } from "../types";
 import AddPinData from "./AddPinData";
 import PinCard from "./PinCard";
 
-const PinData = () => {
-  const pinDataQuery = useQuery("pindata", () =>
+const PinData = ({ isBin = false }: { isBin: boolean }) => {
+  const pinDataQuery = useQuery(`pindata${isBin ? "bin" : ""}`, () =>
     service
-      .get("/pindata/", {
+      .get(`/pindata/${isBin ? "bin/" : ""}`, {
         headers: { authToken: localStorage.getItem("authToken") },
       })
       .then((response) => response.data)
@@ -28,7 +28,9 @@ const PinData = () => {
                 data.id +
                 data.name +
                 data.description +
-                data.secret + data.isFavourite + data.isTrashed +
+                data.secret +
+                data.isFavourite +
+                data.isTrashed +
                 data.createdDate +
                 data.updatedDate
               }

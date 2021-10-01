@@ -1,29 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import { Redirect } from "react-router";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
-import {
-  authUserState,
-  baseUrlState,
-  isAddingNewData,
-  messageState,
-  showMessage,
-  tokenState,
-} from "../store";
+import tw from "tailwind-styled-components";
+import { authUserState, baseUrlState, isAddingNewData } from "../store";
 import AddPinData from "./AddPinData";
 import PinData from "./PinData";
 
 const Dashboard = () => {
   const baseUrl = useRecoilValue(baseUrlState);
   const authUser = useRecoilValueLoadable(authUserState);
+
+  const [viewBin, setViewBin] = useState(false);
+
   switch (authUser.state) {
     case "hasValue":
       if (authUser.contents?.isLoggedIn) {
         return (
           <div>
             <h1>{authUser.contents?.user.username}</h1>
-            <AddNewData />
-            <PinData />
-            {/* <LogOutButton /> */}
+            <div className="flex justify-center text-2xl text-white m-2">
+              <NavBtn
+                className="rounded-tl-2xl rounded-bl-2xl"
+                $active={!viewBin}
+                onClick={() => setViewBin(false)}
+              >
+                Data
+              </NavBtn>
+              <NavBtn
+                className="rounded-tr-2xl rounded-br-2xl"
+                $active={viewBin}
+                onClick={() => setViewBin(true)}
+              >
+                Trashed
+              </NavBtn>
+            </div>
+            {viewBin ? <BinView /> : <DataView />}
           </div>
         );
       } else {
@@ -38,21 +49,17 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-// const LogOutButton = () => {
-//   const [, setToken] = useRecoilState(tokenState);
-//   const [, setMessage] = useRecoilState(messageState);
-//   return (
-//     <button
-//       onClick={() => {
-//         localStorage.removeItem("authToken");
-//         setToken(null);
-//         showMessage("Logged out", setMessage);
-//       }}
-//     >
-//       Logout
-//     </button>
-//   );
-// };
+const NavBtn = tw.button<{ $active: boolean }>`w-32 pt-1 pb-1 focus:outline-none hover:bg-green-700 ${(p) =>
+  p.$active ? "shadow-inner bg-green-700" : "shadow-none bg-green-600"}`;
+
+const DataView = () => (
+  <>
+    <AddNewData />
+    <PinData isBin={false} />
+  </>
+);
+
+const BinView = () => <PinData isBin={true} />;
 
 const AddNewData = () => {
   const [adding, setAdding] = useRecoilState(isAddingNewData);
